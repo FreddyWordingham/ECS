@@ -21,7 +21,6 @@ impl Plugin for PeoplePlugin {
 }
 
 // == Components ==
-#[allow(dead_code)]
 #[derive(Component)]
 struct Person {
     pub name: String,
