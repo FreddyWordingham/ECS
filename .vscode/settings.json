@@ -1,0 +1,18 @@
+{
+    "rust-analyzer.linkedProjects": ["./Cargo.toml"],
+    "workbench.colorCustomizations": {
+        "commandCenter.border": "#15202b99",
+        "sash.hoverBorder": "#9baee2",
+        "sideBar.border": "#9baee2",
+        "statusBar.background": "#738ed7",
+        "statusBar.foreground": "#15202b",
+        "statusBarItem.hoverBackground": "#4b6ecc",
+        "statusBarItem.remoteBackground": "#738ed7",
+        "statusBarItem.remoteForeground": "#15202b",
+        "titleBar.activeBackground": "#738ed7",
+        "titleBar.activeForeground": "#15202b",
+        "titleBar.inactiveBackground": "#738ed799",
+        "titleBar.inactiveForeground": "#15202b99"
+    },
+    "peacock.color": "#738ed7"
+}
