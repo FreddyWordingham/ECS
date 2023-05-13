@@ -4,12 +4,20 @@ use bevy::prelude::*;
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_startup_system(setup)
-        .add_system(print_names)
-        .add_system(people_with_jobs)
-        .add_system(people_without_jobs)
-        .add_system(person_does_job)
+        .add_plugin(PeoplePlugin)
         .run();
+}
+
+// == Plugins ==
+struct PeoplePlugin;
+impl Plugin for PeoplePlugin {
+    fn build(&self, app: &mut App) {
+        app.add_startup_system(setup)
+            .add_system(print_names)
+            .add_system(people_with_jobs)
+            .add_system(people_without_jobs)
+            .add_system(person_does_job);
+    }
 }
 
 // == Components ==
