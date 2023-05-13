@@ -18,13 +18,12 @@ impl Plugin for GamePlugin {
 }
 
 // == Components ==
-
 #[derive(Component)]
 struct Player {}
 
 // == Systems ==
-fn spawn_camera(mut commands: Commands, window_query: Query<&Window, With<PrimaryWindow>>) {
-    let windows = window_query.get_single().unwrap();
+fn spawn_camera(mut commands: Commands, query: Query<&Window, With<PrimaryWindow>>) {
+    let windows = query.get_single().unwrap();
     let width = windows.width();
     let height = windows.height();
 
@@ -36,10 +35,10 @@ fn spawn_camera(mut commands: Commands, window_query: Query<&Window, With<Primar
 
 fn spawn_player(
     mut commands: Commands,
-    window_query: Query<&Window, With<PrimaryWindow>>,
+    query: Query<&Window, With<PrimaryWindow>>,
     asset_server: Res<AssetServer>,
 ) {
-    let window = window_query.get_single().unwrap();
+    let window = query.get_single().unwrap();
     let width = window.width();
     let height = window.height();
 
