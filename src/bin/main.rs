@@ -1,3 +1,6 @@
+use bevy::prelude::*;
+
+// == Main ==
 fn main() {
-    println!("Hello, ECS!")
+    App::new().run();
 }
