@@ -125,14 +125,14 @@ fn confine_player_movement(
 ) {
     if let Ok(mut transform) = player_query.get_single_mut() {
         let window = window_query.get_single().unwrap();
-        let window_width = window.width();
-        let window_height = window.height();
+        let width = window.width();
+        let height = window.height();
 
         let half_player_size = PLAYER_SIZE * 0.5;
         let x_min = half_player_size;
-        let x_max = window_width - half_player_size;
+        let x_max = width - half_player_size;
         let y_min = half_player_size;
-        let y_max = window_height - half_player_size;
+        let y_max = height - half_player_size;
 
         if transform.translation.x < x_min {
             transform.translation.x = x_min;
