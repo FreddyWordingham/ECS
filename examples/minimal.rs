@@ -3,6 +3,7 @@ use bevy::prelude::*;
 // == Main ==
 fn main() {
     App::new()
+        .add_system(bevy::window::close_on_esc)
         .add_plugins(DefaultPlugins)
         .add_plugin(PeoplePlugin)
         .run();

@@ -1,8 +1,10 @@
 use bevy::{prelude::*, window::PrimaryWindow};
+use rand::prelude::*;
 
 // == Settings ==
 const PLAYER_SPEED: f32 = 500.0;
 const PLAYER_SIZE: f32 = 64.0;
+const NUMBER_OF_ENEMIES: usize = 10;
 
 // == Main ==
 fn main() {
@@ -19,6 +21,7 @@ impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(spawn_camera)
             .add_startup_system(spawn_player)
+            .add_startup_system(spawn_enemies)
             .add_system(player_movement)
             .add_system(confine_player_movement);
     }
@@ -27,6 +30,9 @@ impl Plugin for GamePlugin {
 // == Components ==
 #[derive(Component)]
 struct Player {}
+
+#[derive(Component)]
+struct Enemy {}
 
 // == Systems ==
 fn spawn_camera(mut commands: Commands, query: Query<&Window, With<PrimaryWindow>>) {
@@ -38,6 +44,31 @@ fn spawn_camera(mut commands: Commands, query: Query<&Window, With<PrimaryWindow
         transform: Transform::from_xyz(width * 0.5, height * 0.5, 0.0),
         ..default()
     });
+}
+
+fn spawn_enemies(
+    mut commands: Commands,
+    query: Query<&Window, With<PrimaryWindow>>,
+    asset_server: Res<AssetServer>,
+) {
+    let window = query.get_single().unwrap();
+    let width = window.width();
+    let height = window.height();
+
+    for _ in 0..NUMBER_OF_ENEMIES {
+        commands.spawn((
+            Enemy {},
+            SpriteBundle {
+                transform: Transform::from_xyz(
+                    random::<f32>() * width,
+                    random::<f32>() * height,
+                    0.0,
+                ),
+                texture: asset_server.load("sprites/ball_red_large.png"),
+                ..default()
+            },
+        ));
+    }
 }
 
 fn spawn_player(
