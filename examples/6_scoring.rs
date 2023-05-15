@@ -1,5 +1,6 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 use rand::prelude::*;
+use std::f32::consts::PI;
 
 // == Settings ==
 const PLAYER_SPEED: f32 = 500.0;
@@ -23,18 +24,29 @@ fn main() {
 struct GamePlugin;
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(spawn_camera)
+        app.init_resource::<Score>()
+            .add_startup_system(spawn_camera)
             .add_startup_system(spawn_player)
             .add_startup_system(spawn_enemies)
             .add_startup_system(spawn_stars)
             .add_system(player_movement)
             .add_system(confine_player_movement)
-            .add_system(respawn_player)
             .add_system(enemy_movement)
             .add_system(update_enemy_direction)
             .add_system(confine_enemy_movement)
             .add_system(player_enemy_collision)
-            .add_system(player_hit_star);
+            .add_system(player_hit_star)
+            .add_system(update_score);
+    }
+}
+
+// == Resources ==
+#[derive(Resource)]
+struct Score(u32);
+
+impl Default for Score {
+    fn default() -> Self {
+        Self(0)
     }
 }
 
@@ -138,30 +150,6 @@ fn confine_player_movement(
     }
 }
 
-fn respawn_player(
-    mut commands: Commands,
-    player_query: Query<&Player>,
-    query: Query<&Window, With<PrimaryWindow>>,
-    asset_server: Res<AssetServer>,
-) {
-    if player_query.get_single().is_err() {
-        let window = query.get_single().unwrap();
-        let width = window.width();
-        let height = window.height();
-
-        commands.spawn((
-            Player {},
-            SpriteBundle {
-                transform: Transform::from_xyz(width / 2.0, height / 2.0, 0.0),
-                texture: asset_server.load("sprites/ball_blue_large.png"),
-                ..default()
-            },
-        ));
-
-        println!("Spawned player");
-    }
-}
-
 fn spawn_enemies(
     mut commands: Commands,
     query: Query<&Window, With<PrimaryWindow>>,
@@ -172,6 +160,8 @@ fn spawn_enemies(
     let height = window.height();
 
     for _ in 0..NUMBER_OF_ENEMIES {
+        let mut theta = random::<f32>() * PI * 2.0;
+
         commands.spawn((
             Enemy {
                 direction: Vec2::new(random::<f32>() - 0.5, random::<f32>() - 0.5).normalize(),
@@ -321,6 +311,7 @@ fn player_hit_star(
     star_query: Query<(Entity, &Transform), With<Star>>,
     audio: Res<Audio>,
     asset_server: Res<AssetServer>,
+    mut score: ResMut<Score>,
 ) {
     if let Ok(player_transform) = player_query.get_single() {
         let collision_distance = PLAYER_SIZE * 0.5 + STAR_SIZE * 0.5;
@@ -331,10 +322,19 @@ fn player_hit_star(
                 .distance(star_transform.translation)
                 < collision_distance
             {
+                score.0 += 1;
+
                 commands.entity(star).despawn();
+
                 let effect = asset_server.load("audio/laser_large_000.ogg");
                 audio.play(effect);
             }
         }
+    }
+}
+
+fn update_score(score: Res<Score>) {
+    if score.is_changed() {
+        println!("Score: {}", score.0);
     }
 }
