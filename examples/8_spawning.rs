@@ -413,7 +413,6 @@ fn spawn_enemies_over_time(
         let height = window.height();
 
         let theta = random::<f32>() * 2.0 * PI;
-
         commands.spawn((
             Enemy {
                 direction: Vec2::new(theta.cos(), theta.sin()),
