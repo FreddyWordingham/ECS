@@ -29,6 +29,7 @@ impl Plugin for GamePlugin {
         app.init_resource::<Score>()
             .init_resource::<StarSpawnTimer>()
             .init_resource::<EnemySpawnTimer>()
+            .init_resource::<HighScores>()
             .add_event::<GameOver>()
             .add_startup_system(spawn_camera)
             .add_startup_system(spawn_player)
@@ -47,7 +48,9 @@ impl Plugin for GamePlugin {
             .add_system(tick_enemy_spawn_timer)
             .add_system(spawn_stars_over_time)
             .add_system(spawn_enemies_over_time)
-            .add_system(handle_game_over);
+            .add_system(handle_game_over)
+            .add_system(update_high_scores)
+            .add_system(high_scores_updated);
     }
 }
 
@@ -55,6 +58,14 @@ impl Plugin for GamePlugin {
 struct GameOver(u32);
 
 // == Resources ==
+#[derive(Resource)]
+struct HighScores(Vec<(String, u32)>);
+impl Default for HighScores {
+    fn default() -> Self {
+        Self(vec![("Bens".to_string(), 2), ("Philber".to_string(), 5)])
+    }
+}
+
 #[derive(Resource)]
 struct Score(u32);
 impl Default for Score {
@@ -448,5 +459,23 @@ fn exit_game(keyboard_input: Res<Input<KeyCode>>, mut exit: EventWriter<AppExit>
 fn handle_game_over(mut game_over_event_writer: EventReader<GameOver>) {
     for game_over in game_over_event_writer.iter() {
         println!("Game Over! Score: {}", game_over.0);
+    }
+}
+
+fn update_high_scores(
+    mut game_over_event_reader: EventReader<GameOver>,
+    mut high_scores: ResMut<HighScores>,
+) {
+    for event in game_over_event_reader.iter() {
+        high_scores.0.push((String::from("Player"), event.0));
+    }
+}
+
+fn high_scores_updated(high_scores: Res<HighScores>) {
+    if high_scores.is_changed() {
+        println!("High scores:");
+        for (i, (name, score)) in high_scores.0.iter().enumerate() {
+            println!("{}. {}\t{}", i + 1, name, score);
+        }
     }
 }
