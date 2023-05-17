@@ -29,6 +29,7 @@ impl Plugin for GamePlugin {
         app.init_resource::<Score>()
             .init_resource::<StarSpawnTimer>()
             .init_resource::<EnemySpawnTimer>()
+            .add_event::<GameOver>()
             .add_startup_system(spawn_camera)
             .add_startup_system(spawn_player)
             .add_startup_system(spawn_enemies)
@@ -45,9 +46,13 @@ impl Plugin for GamePlugin {
             .add_system(tick_star_spawn_timer)
             .add_system(tick_enemy_spawn_timer)
             .add_system(spawn_stars_over_time)
-            .add_system(spawn_enemies_over_time);
+            .add_system(spawn_enemies_over_time)
+            .add_system(handle_game_over);
     }
 }
+
+// == Events ==
+struct GameOver(u32);
 
 // == Resources ==
 #[derive(Resource)]
@@ -281,10 +286,12 @@ fn confine_enemy_movement(
 
 fn player_enemy_collision(
     mut commands: Commands,
+    mut game_over_event_writer: EventWriter<GameOver>,
     mut player_query: Query<(Entity, &Transform), With<Player>>,
     enemy_query: Query<&Transform, With<Enemy>>,
     audio: Res<Audio>,
     asset_server: Res<AssetServer>,
+    score: Res<Score>,
 ) {
     let collision_distance = (PLAYER_SIZE + ENEMY_SIZE) * 0.5;
 
@@ -298,6 +305,8 @@ fn player_enemy_collision(
                 commands.entity(player_entity).despawn();
                 let effect = asset_server.load("audio/explosion_crunch_000.ogg");
                 audio.play(effect);
+
+                game_over_event_writer.send(GameOver(score.0));
             }
         }
     }
@@ -433,5 +442,11 @@ fn spawn_enemies_over_time(
 fn exit_game(keyboard_input: Res<Input<KeyCode>>, mut exit: EventWriter<AppExit>) {
     if keyboard_input.just_pressed(KeyCode::Escape) {
         exit.send(AppExit);
+    }
+}
+
+fn handle_game_over(mut game_over_event_writer: EventReader<GameOver>) {
+    for game_over in game_over_event_writer.iter() {
+        println!("Game Over! Score: {}", game_over.0);
     }
 }
