@@ -1,4 +1,5 @@
-pub mod components;
-pub mod events;
-pub mod resources;
-pub mod systems;
+pub mod enemy;
+pub mod game;
+pub mod player;
+pub mod score;
+pub mod star;
